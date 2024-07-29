@@ -26,6 +26,7 @@ public class ticket {
     private String summary;
     private String resolution;
     private Date date_resolved;
+    private int version;
     @ManyToOne
     private feature feature;
     @ManyToOne

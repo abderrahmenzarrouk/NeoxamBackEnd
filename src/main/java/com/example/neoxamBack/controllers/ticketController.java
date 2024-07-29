@@ -1,15 +1,22 @@
 package com.example.neoxamBack.controllers;
 
+import com.example.neoxamBack.entities.*;
+import com.example.neoxamBack.repositories.AssigneeModuleStatusRepository;
+import com.example.neoxamBack.repositories.assigneeRepository;
 import com.example.neoxamBack.repositories.moduleRepository;
 import com.example.neoxamBack.repositories.ticketrepository;
+import com.example.neoxamBack.services.ExcelService;
+import com.example.neoxamBack.services.IModuleService;
 import com.example.neoxamBack.services.ITicketService;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import com.example.neoxamBack.entities.ticket;
-import com.example.neoxamBack.entities.module;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
+import java.text.ParseException;
 import java.util.*;
 
 @RestController
@@ -19,11 +26,21 @@ import java.util.*;
 public class ticketController {
     ITicketService ticketService;
     moduleRepository moduleRepository;
+    IModuleService moduleService;
     @Autowired
     ticketrepository ticketRepository;
+    assigneeRepository assigneeRepository;
+    AssigneeModuleStatusRepository assigneeModuleStatusRepository;
+
+
     @GetMapping("/alltickets")
     public List<ticket> getalltickets() {
         return ticketService.getalltickets();
+    }
+
+    @GetMapping("/allassignees")
+    public List<assignee> getallassignees() {
+        return assigneeRepository.findAll();
     }
     @GetMapping("/ticketbyid/{id}")
     public ticket getticketbyid(@PathVariable("id") int id) {
@@ -89,5 +106,52 @@ public class ticketController {
     public List<String> getallmodules() {
         return ticketService.getallmodules();
     }
+    @PutMapping("/update-module-status")
+    public ResponseEntity<String> updateAllAssigneeModuleStatuses() {
+        moduleService.updateAllAssigneeModuleStatus();
+        return ResponseEntity.ok("Module statuses updated for all assignees.");
+    }
+
+    @GetMapping("/assignee/modules/{assigneeName}")
+    public List<AssigneeModuleStatusDto> getModulesWithAssigneeStatusByAssigneeName(@PathVariable String assigneeName) {
+        return moduleService.getModulesWithAssigneeStatusByAssigneeName(assigneeName);
+    }
+
+    @PutMapping("/updatestatus/{idmodule}/{assigneename}")
+    public AssigneeModuleStatus updateassigneestatus(@PathVariable String assigneename,@PathVariable int idmodule) {
+        return moduleService.updateassigneestatus(assigneename,idmodule);
+    }
+
+    @PostMapping("/updateversion")
+    public void updateversion(){
+        ticketService.updateversion();
+    }
+
+    @GetMapping("/tickets/version/{version}")
+    public List<ticket> getticketbyversion(@PathVariable int version) {
+        return ticketService.findticketsbyversion(version);
+    }
+    @GetMapping("/tickets/allversions")
+    public List<Integer> getallticketsversions() {
+        return ticketService.findticketversions();
+    }
+
+    @DeleteMapping("/version/{version}")
+    public ResponseEntity<String> deleteTicketsByVersion(@PathVariable int version) {
+        try {
+            ticketService.deleteTicketsByVersion(version);
+            return ResponseEntity.ok("Tickets deleted successfully for version: " + version);
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body("An error occurred while deleting tickets: " + e.getMessage());
+        }
+    }
+
+    @GetMapping("/modulebystatus/{name}")
+    public List<AssigneeModuleStatus> getallticketsversions(@PathVariable String name) {
+        return assigneeModuleStatusRepository.findByModule_Name(name);
+    }
+
+
+
 
 }

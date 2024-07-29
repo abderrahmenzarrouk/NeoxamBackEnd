@@ -20,5 +20,8 @@ public class assignee {
     @Column(name="id")
     private Integer id;
     private String name;
+    public assignee(String name){
+        this.name = name;
+    }
 
 }

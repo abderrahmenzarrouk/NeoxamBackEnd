@@ -1,15 +1,19 @@
 package com.example.neoxamBack.repositories;
 import com.example.neoxamBack.entities.ticket;
+import com.example.neoxamBack.entities.module;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 @Repository
 public interface ticketrepository extends JpaRepository<ticket,Integer>{
     @Query("SELECT t.feature.module.name, t.assignee.name, COUNT(t.id) FROM ticket t GROUP BY t.feature.module.name, t.assignee.name")
     List<Object[]> countTicketsByAssigneeAndModule();
+
+    List<ticket> findByVersion(int version);
 
 
 
@@ -68,5 +72,14 @@ public interface ticketrepository extends JpaRepository<ticket,Integer>{
     List<Object[]> countTicketsByAssignee();
     @Query("SELECT DISTINCT m.name FROM ticket t JOIN t.feature f JOIN f.module m")
     List<String> findDistinctModuleNames();
+
+    @Query("SELECT COUNT(t) FROM ticket t WHERE t.assignee.id = :assigneeId AND t.feature.module.id = :moduleId")
+    long countByAssigneeIdAndFeatureModuleId(@Param("assigneeId") Integer assigneeId, @Param("moduleId") Integer moduleId);
+
+    @Query("SELECT DISTINCT t.version FROM ticket t")
+    List<Integer> findDistinctVersions();
+
+    @Transactional
+    void deleteByVersion(int version);
 
 }

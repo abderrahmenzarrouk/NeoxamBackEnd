@@ -168,4 +168,26 @@ public class TicketService implements ITicketService {
     public List<String> getallmodules() {
         return ticketrepository.findDistinctModuleNames();
     }
+
+    @Override
+    public void updateversion() {
+        List<ticket> tickets = ticketrepository.findAll();
+        for (ticket t: tickets) {
+            t.setVersion(1);
+        }
+    }
+
+    @Override
+    public List<ticket> findticketsbyversion(int version) {
+        return ticketrepository.findByVersion(version);
+    }
+
+    @Override
+    public List<Integer> findticketversions() {
+        return ticketrepository.findDistinctVersions();
+    }
+    @Override
+    public void deleteTicketsByVersion(int version) {
+        ticketrepository.deleteByVersion(version);
+    }
 }

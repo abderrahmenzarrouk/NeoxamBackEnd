@@ -9,6 +9,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -37,6 +38,35 @@ public class userService implements UserDetailsService {
         userRepository.save(user);
         String token = UUID.randomUUID().toString();
         return token;
+    }
+    public String resetpassword(Long id,String oldpassword, String newpassword){
+        User u = userRepository.findById(id).get();
+        String password = u.getPassword();
+        BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+        if(passwordEncoder.matches(oldpassword, password)){
+            String encodedrandompassword = passwordEncoder.encode(newpassword);
+            u.setPassword(encodedrandompassword);
+            userRepository.save(u);
+            return "Password changed with success";
+        }else {
+            throw new IllegalArgumentException("Incorrect old password");
+        }
+    }
+
+    public List<User> getallusers(){
+        return userRepository.findAll();
+    }
+    public User acceptuser(String email){
+        User u = userRepository.findByEmail(email).get();
+        u.setEnabled(true);
+        userRepository.save(u);
+        return u;
+    }
+    public User banuser(String email){
+        User u = userRepository.findByEmail(email).get();
+        u.setEnabled(false);
+        userRepository.save(u);
+        return u;
     }
 
 }

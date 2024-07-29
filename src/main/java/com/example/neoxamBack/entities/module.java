@@ -18,4 +18,8 @@ public class module {
     @Column(name="id")
     private Integer id;
     private String name;
+
+    public module(String name){
+        this.name=name;
+    }
 }

@@ -15,4 +15,9 @@ public interface ITicketService {
     List<ticket> findTicketsByModuleName(String moduleName);
     List<Map<String, Object>> getAssigneeStats();
     List<String> getallmodules();
+    void updateversion();
+    List<ticket> findticketsbyversion(int version);
+    List<Integer> findticketversions();
+    void deleteTicketsByVersion(int version);
+
 }
