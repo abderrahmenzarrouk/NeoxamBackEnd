@@ -190,4 +190,9 @@ public class TicketService implements ITicketService {
     public void deleteTicketsByVersion(int version) {
         ticketrepository.deleteByVersion(version);
     }
+
+    @Override
+    public List<Object[]> countTicketsByAssigneeAndModuleforManagaer(int managerid) {
+        return ticketrepository.countTicketsByAssigneeAndModuleforManagaer(managerid);
+    }
 }

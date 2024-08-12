@@ -23,11 +23,16 @@ public class User implements UserDetails {
     private long id;
     private String lastName;
     private String firstName;
+    @Column(unique = true)
     private String email;
     private String password;
     @ManyToOne
     @JoinColumn(name = "role_id")
     private Roles userRole;
+    @ManyToOne
+    @JoinColumn(name = "director_id")
+    private User director;
+
     private boolean locked = false;
     private boolean enabled = false;
     @Override

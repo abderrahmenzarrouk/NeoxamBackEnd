@@ -82,4 +82,11 @@ public interface ticketrepository extends JpaRepository<ticket,Integer>{
     @Transactional
     void deleteByVersion(int version);
 
+    @Query("SELECT t.feature.module.name, t.assignee.name, COUNT(t.id) " +
+            "FROM ticket t " +
+            "JOIN t.assignee a " +
+            "WHERE a.manager.id = :managerId " +
+            "GROUP BY t.feature.module.name, t.assignee.name")
+    List<Object[]> countTicketsByAssigneeAndModuleforManagaer(@Param("managerId") Integer managerId);
+
 }

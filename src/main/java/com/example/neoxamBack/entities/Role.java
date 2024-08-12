@@ -2,5 +2,7 @@ package com.example.neoxamBack.entities;
 
 public enum Role {
     RH,
-    Admin
+    Admin,
+    Manager,
+    Director
 }

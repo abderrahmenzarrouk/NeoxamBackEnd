@@ -20,6 +20,9 @@ public class assignee {
     @Column(name="id")
     private Integer id;
     private String name;
+    @ManyToOne
+    private User manager;
+    private String rank;
     public assignee(String name){
         this.name = name;
     }

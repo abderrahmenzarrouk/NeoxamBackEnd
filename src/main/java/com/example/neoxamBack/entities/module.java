@@ -18,6 +18,7 @@ public class module {
     @Column(name="id")
     private Integer id;
     private String name;
+    private Integer ticketrequired;
 
     public module(String name){
         this.name=name;

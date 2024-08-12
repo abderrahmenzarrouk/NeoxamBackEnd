@@ -19,5 +19,6 @@ public interface ITicketService {
     List<ticket> findticketsbyversion(int version);
     List<Integer> findticketversions();
     void deleteTicketsByVersion(int version);
+    public List<Object[]> countTicketsByAssigneeAndModuleforManagaer(int managerid);
 
 }

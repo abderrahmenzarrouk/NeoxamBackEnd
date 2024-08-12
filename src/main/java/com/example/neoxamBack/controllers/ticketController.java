@@ -151,6 +151,42 @@ public class ticketController {
         return assigneeModuleStatusRepository.findByModule_Name(name);
     }
 
+    @GetMapping("/count-by-assignee/forManager/{idmanager}")
+    public ResponseEntity<List<Map<String, Object>>> getTicketCountsByAssigneeAndModuleforManagaer(@PathVariable int idmanager) {
+        List<Object[]> results = ticketService.countTicketsByAssigneeAndModuleforManagaer(idmanager);
+        Map<String, Map<String, Integer>> moduleAssigneeMap = new HashMap<>();
+
+        for (Object[] result : results) {
+            String moduleName = (String) result[0];
+            String assigneeName = (String) result[1];
+            Long count = (Long) result[2];
+
+            moduleAssigneeMap.computeIfAbsent(moduleName, k -> new HashMap<>()).put(assigneeName, count.intValue());
+        }
+
+        List<Map<String, Object>> response = new ArrayList<>();
+        for (Map.Entry<String, Map<String, Integer>> entry : moduleAssigneeMap.entrySet()) {
+            Map<String, Object> map = new HashMap<>();
+            map.put("module", entry.getKey());
+            map.put("assignees", entry.getValue());
+            response.add(map);
+        }
+
+        return ResponseEntity.ok(response);
+    }
+
+    @PutMapping("/update-module-ticketrequired/{idmodule}/{nbtickets}")
+    public module updatemoduleticketrequired(@PathVariable int idmodule,@PathVariable int nbtickets) {
+        module m = moduleRepository.findById(idmodule).orElse(null);
+        m.setTicketrequired(nbtickets);
+        return moduleRepository.save(m);
+    }
+
+    @GetMapping("/getlistmodules")
+    public List<module> getlistmodules() {
+        return moduleRepository.findAll();
+    }
+
 
 
 

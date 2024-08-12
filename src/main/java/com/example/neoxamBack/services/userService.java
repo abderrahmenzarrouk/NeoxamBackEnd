@@ -1,6 +1,8 @@
 package com.example.neoxamBack.services;
 
 import com.example.neoxamBack.entities.User;
+import com.example.neoxamBack.entities.assignee;
+import com.example.neoxamBack.repositories.assigneeRepository;
 import com.example.neoxamBack.repositories.userRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -16,6 +18,7 @@ import java.util.UUID;
 @AllArgsConstructor
 public class userService implements UserDetailsService {
     private final userRepository userRepository;
+    private final assigneeRepository assigneeRepository;
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
     private final static String user_not_found_MSG = "user with email %s is absent ";
     @Override
@@ -67,6 +70,34 @@ public class userService implements UserDetailsService {
         u.setEnabled(false);
         userRepository.save(u);
         return u;
+    }
+
+    public assignee affectmanagertoassignee(Long idmanager,int idassignee){
+        User manager = userRepository.findById(idmanager).orElse(null);
+        assignee assignee = assigneeRepository.findById(idassignee).orElse(null);
+        assignee.setManager(manager);
+        assigneeRepository.save(assignee);
+        return assignee;
+    }
+    public List<assignee> affectmultipleassignees(List<assignee> listA, Long idmanager ){
+        User manager = userRepository.findById(idmanager).orElse(null);
+
+        listA.forEach(assignee -> {
+
+            assignee existingAssignee = assigneeRepository.findByName(assignee.getName()).get();
+
+            if (existingAssignee != null) {
+
+                existingAssignee.setManager(manager);
+                assigneeRepository.save(existingAssignee);
+            } else {
+
+                System.out.println("Assignee with name " + assignee.getName() + " not found.");
+            }
+        });
+
+        return listA;
+
     }
 
 }
