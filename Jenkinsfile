@@ -30,7 +30,7 @@ pipeline {
                     // Start a MySQL container with an alias "mysql"
                     docker.image('mysql:latest').withRun('-e MYSQL_ROOT_PASSWORD=${MYSQL_PASSWORD} -e MYSQL_DATABASE=neoxame -p 3306:3306 --name mysql') {
                         // Wait for MySQL to start up
-                        sleep(time: 30, unit: 'SECONDS')
+                        sleep(time: 60, unit: 'SECONDS')
                     }
                 }
             }
