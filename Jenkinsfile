@@ -7,7 +7,7 @@ pipeline {
         maven "Maven3"
     }
     environment {
-        MYSQL_URL = 'jdbc:mysql://localhost:3306/neoxame'
+        MYSQL_URL = 'jdbc:mysql://mysql:3306/neoxame'
         MYSQL_USER = 'root'
         MYSQL_PASSWORD = 'password'
     }
@@ -27,8 +27,8 @@ pipeline {
         stage("Setup MySQL") {
             steps {
                 script {
-                    // Start a MySQL container
-                    docker.image('mysql:latest').withRun('-e MYSQL_ROOT_PASSWORD=${MYSQL_PASSWORD} -e MYSQL_DATABASE=neoxame -p 3306:3306') {
+                    // Start a MySQL container with an alias "mysql"
+                    docker.image('mysql:latest').withRun('-e MYSQL_ROOT_PASSWORD=${MYSQL_PASSWORD} -e MYSQL_DATABASE=neoxame -p 3306:3306 --name mysql') {
                         // Wait for MySQL to start up
                         sleep(time: 30, unit: 'SECONDS')
                     }
