@@ -18,6 +18,18 @@ pipeline{
                 git branch: 'main', credentialsId: 'github', url: 'https://github.com/abderrahmenzarrouk/NeoxamBackEnd'
             }
         }
+    
+        stage("Build application"){
+            steps{
+                sh "mvn clean package"
+            }
+        }
+
+        stage("Test application"){
+            steps{
+                gsh "mvn test"
+            }
+        }
     }
 
 }
