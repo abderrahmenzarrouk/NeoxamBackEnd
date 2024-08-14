@@ -32,17 +32,6 @@ pipeline {
                 script {
                     sh "docker-compose up --build -d"
 
-                    // Wait for MySQL to be ready
-                    waitUntil {
-                        script {
-                            def result = sh(script: "docker-compose exec mysql mysqladmin ping -h localhost --silent", returnStatus: true)
-                            if (result != 0) {
-                                // Print container logs if MySQL is not ready
-                                sh "docker-compose logs mysql"
-                            }
-                            return result == 0
-                        }
-                    }
                 }
             }
         }
@@ -52,6 +41,7 @@ pipeline {
                 // Ensure environment variables are set
                 sh "docker-compose exec backend mvn clean package"
             }
+            echo "Built and started Docker containers."
         }
 
         stage("List MySQL Tables") {
