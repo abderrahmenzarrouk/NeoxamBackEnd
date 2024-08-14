@@ -86,19 +86,6 @@ pipeline {
             }
         }
 
-        stage("Build application") {
-            steps {
-                script {
-                    try {
-                        sh "docker exec backend mvn clean package"
-                        echo "Application built successfully."
-                    } catch (Exception e) {
-                        echo "Failed to build the application."
-                        throw e
-                    }
-                }
-            }
-        }
 
         stage("List MySQL Tables") {
             steps {
