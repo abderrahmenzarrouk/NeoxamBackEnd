@@ -25,8 +25,9 @@ pipeline {
             steps {
                 script {
                     sh "docker ps -q --filter 'name=mysql' | xargs -r docker rm -f"
+                    sh "docker ps -q --filter 'name=backend' | xargs -r docker rm -f"
                 }
-                echo "Cleaned up existing MySQL containers."
+                echo "Cleaned up existing containers."
             }
         }
 
@@ -35,7 +36,7 @@ pipeline {
                 script {
                     echo "Starting MySQL container"
                     try {
-                        sh "docker-compose -f mysql-docker-compose.yml up --build -d mysql"
+                        sh "docker run -d --name mysql -e MYSQL_ROOT_PASSWORD=root -e MYSQL_DATABASE=neoxame -p 3306:3306 mysql:latest"
 
                         // Check MySQL container status
                         def mysqlStatus = sh(script: "docker ps --filter 'name=mysql' --format '{{.Names}}'", returnStdout: true).trim()
@@ -58,16 +59,17 @@ pipeline {
             }
         }
 
-        stage("Build and Run Containers") {
+        stage("Build and Run Backend Container") {
             steps {
                 script {
                     echo "Starting to build and run backend container"
                     try {
-                        sh "docker-compose up --build -d backend"
-                        echo "Docker Compose command executed"
+                        sh "docker build -t backend -f Dockerfile ."
+                        sh "docker run -d --name backend --link mysql:mysql -e SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/neoxame -e SPRING_DATASOURCE_USERNAME=root -e SPRING_DATASOURCE_PASSWORD=root backend"
+                        echo "Backend container built and started successfully."
 
-                        // Check Docker Compose logs
-                        sh "docker-compose logs"
+                        // Check Docker logs
+                        sh "docker logs backend"
 
                         // Ensure MySQL container is still running
                         def mysqlStatus = sh(script: "docker ps --filter 'name=mysql' --format '{{.Names}}'", returnStdout: true).trim()
@@ -88,7 +90,7 @@ pipeline {
             steps {
                 script {
                     try {
-                        sh "docker-compose exec backend mvn clean package"
+                        sh "docker exec backend mvn clean package"
                         echo "Application built successfully."
                     } catch (Exception e) {
                         echo "Failed to build the application."
@@ -102,7 +104,7 @@ pipeline {
             steps {
                 script {
                     try {
-                        sh "docker-compose exec mysql mysql -u root -proot -e 'SHOW TABLES FROM neoxame;'"
+                        sh "docker exec mysql mysql -u root -proot -e 'SHOW TABLES FROM neoxame;'"
                         echo "Listed MySQL tables."
                     } catch (Exception e) {
                         echo "Failed to list MySQL tables."
@@ -119,7 +121,7 @@ pipeline {
             steps {
                 script {
                     try {
-                        sh "docker-compose exec backend mvn test -Dspring.profiles.active=docker"
+                        sh "docker exec backend mvn test -Dspring.profiles.active=docker"
                         echo "Application tests completed."
                     } catch (Exception e) {
                         echo "Failed to run application tests."
