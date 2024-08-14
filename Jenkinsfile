@@ -10,12 +10,14 @@ pipeline {
         stage("Cleanup Workspace") {
             steps {
                 cleanWs()
+                echo "Workspace cleaned up."
             }
         }
 
         stage("Checkout from SCM") {
             steps {
                 git branch: 'main', credentialsId: 'github', url: 'https://github.com/abderrahmenzarrouk/NeoxamBackEnd'
+                echo "Checked out code from SCM."
             }
         }
 
@@ -24,31 +26,48 @@ pipeline {
                 script {
                     sh "docker ps -q --filter 'name=mysql' | xargs -r docker rm -f"
                 }
+                echo "Cleaned up existing MySQL containers."
             }
         }
 
         stage("Build and Run Containers") {
             steps {
                 script {
-                    sh "docker-compose up --build -d"
-                    echo "Built and started Docker containers.1"
+                    try {
+                        sh "docker-compose up --build -d"
+                        echo "Built and started Docker containers."
+                    } catch (Exception e) {
+                        echo "Failed to build and run Docker containers."
+                        throw e
+                    }
                 }
             }
         }
 
         stage("Build application") {
             steps {
-                // Ensure environment variables are set
-                sh "docker-compose exec backend mvn clean package"
-                echo "Built and started Docker containers."
+                script {
+                    try {
+                        sh "docker-compose exec backend mvn clean package"
+                        echo "Application built successfully."
+                    } catch (Exception e) {
+                        echo "Failed to build the application."
+                        throw e
+                    }
+                }
             }
-
         }
 
         stage("List MySQL Tables") {
             steps {
                 script {
-                    sh "docker-compose exec mysql mysql -u root -proot -e 'SHOW TABLES FROM neoxame;'"
+                    try {
+                        sh "docker-compose exec mysql mysql -u root -proot -e 'SHOW TABLES FROM neoxame;'"
+                        echo "Listed MySQL tables."
+                    } catch (Exception e) {
+                        echo "Failed to list MySQL tables."
+                        throw e
+                    }
                 }
             }
         }
@@ -58,8 +77,15 @@ pipeline {
                 branch 'main' // Run tests only on the main branch
             }
             steps {
-                // Ensure the tests run with the correct environment variables
-                sh "docker-compose exec backend mvn test -Dspring.profiles.active=docker"
+                script {
+                    try {
+                        sh "docker-compose exec backend mvn test -Dspring.profiles.active=docker"
+                        echo "Application tests completed."
+                    } catch (Exception e) {
+                        echo "Failed to run application tests."
+                        throw e
+                    }
+                }
             }
         }
     }
