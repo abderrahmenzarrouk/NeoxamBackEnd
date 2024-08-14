@@ -30,18 +30,14 @@ pipeline {
             }
         }
 
-        stage("Build and Run Containers") {
+        stage("Setup MySQL Container") {
             steps {
                 script {
-                    echo "Starting to build and run containers"
+                    echo "Starting MySQL container"
                     try {
-                        sh "docker-compose up --build -d"
-                        echo "Docker Compose command executed"
+                        sh "docker-compose -f mysql-docker-compose.yml up --build -d mysql"
 
-                        // Check Docker Compose logs
-                        sh "docker-compose logs"
-
-                        // Check if MySQL container is running
+                        // Check MySQL container status
                         def mysqlStatus = sh(script: "docker ps --filter 'name=mysql' --format '{{.Names}}'", returnStdout: true).trim()
                         echo "MySQL container status: ${mysqlStatus}"
 
@@ -55,13 +51,38 @@ pipeline {
                             error "MySQL container is not running."
                         }
                     } catch (Exception e) {
-                        echo "Failed to build and run Docker containers."
+                        echo "Failed to set up MySQL container."
                         throw e
                     }
                 }
             }
         }
 
+        stage("Build and Run Containers") {
+            steps {
+                script {
+                    echo "Starting to build and run backend container"
+                    try {
+                        sh "docker-compose up --build -d backend"
+                        echo "Docker Compose command executed"
+
+                        // Check Docker Compose logs
+                        sh "docker-compose logs"
+
+                        // Ensure MySQL container is still running
+                        def mysqlStatus = sh(script: "docker ps --filter 'name=mysql' --format '{{.Names}}'", returnStdout: true).trim()
+                        echo "MySQL container status: ${mysqlStatus}"
+
+                        if (mysqlStatus != "mysql") {
+                            error "MySQL container is not running, backend container setup may fail."
+                        }
+                    } catch (Exception e) {
+                        echo "Failed to build and run backend container."
+                        throw e
+                    }
+                }
+            }
+        }
 
         stage("Build application") {
             steps {
