@@ -13,11 +13,10 @@ services:
       - "3306:3306"
 
   backend:
-    image: openjdk:17
-    container_name: backend
     build:
       context: .
       dockerfile: Dockerfile
+    container_name: backend
     depends_on:
       - mysql
     environment:
@@ -26,6 +25,8 @@ services:
       SPRING_DATASOURCE_PASSWORD: root
     networks:
       - mynetwork
+    ports:
+      - "8083:8083"
 
 networks:
   mynetwork:
