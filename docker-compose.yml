@@ -4,6 +4,7 @@ services:
     image: mysql:latest
     environment:
       - MYSQL_ROOT_PASSWORD=root
+      - MYSQL_DATABASE=neoxame
     volumes:
       - mysql-data:/var/lib/mysql
     ports:
