@@ -1,35 +1,31 @@
-version: '3'
+version: '3.8'
 services:
   mysql:
-    image: mysql:latest
+    image: mysql:8.0
+    container_name: mysql
     environment:
-      - MYSQL_ROOT_PASSWORD=root
-      - MYSQL_DATABASE=neoxame
-    volumes:
-      - mysql-data:/var/lib/mysql
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: neoxame
     ports:
-      - 3306:3306
+      - "3306:3306"
     networks:
-      - backend-network
+      - mynetwork
 
   backend:
+    image: openjdk:17
+    container_name: backend
     build:
       context: .
       dockerfile: Dockerfile
-    environment:
-      - DB_HOST=mysql
-      - DB_NAME=neoxame
-      - DB_USERNAME=root
-      - DB_PASSWORD=root
-    ports:
-      - 8080:8080
     depends_on:
       - mysql
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/neoxame
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: root
     networks:
-      - backend-network
+      - mynetwork
 
 networks:
-  backend-network:
-
-volumes:
-  mysql-data:
+  mynetwork:
+    driver: bridge
