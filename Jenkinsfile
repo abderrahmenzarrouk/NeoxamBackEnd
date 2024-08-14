@@ -49,7 +49,7 @@ pipeline {
 
         stage("Build application") {
             steps {
-                sh "docker-compose exec app mvn clean package"
+                sh "docker-compose exec backend mvn clean package"
             }
         }
 
@@ -58,14 +58,8 @@ pipeline {
                 branch 'main' // Run tests only on the main branch
             }
             steps {
-                sh "docker-compose exec app mvn test"
+                sh "docker-compose exec backend mvn test"
             }
-        }
-    }
-    post {
-        always {
-            // Clean up Docker containers
-            sh "docker-compose down"
         }
     }
 }
