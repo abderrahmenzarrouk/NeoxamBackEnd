@@ -49,6 +49,7 @@ pipeline {
 
         stage("Build application") {
             steps {
+                // Ensure environment variables are set
                 sh "docker-compose exec backend mvn clean package"
             }
         }
@@ -58,7 +59,8 @@ pipeline {
                 branch 'main' // Run tests only on the main branch
             }
             steps {
-                sh "docker-compose exec backend mvn test"
+                // Ensure the tests run with the correct environment variables
+                sh "docker-compose exec backend mvn test -Dspring.profiles.active=docker"
             }
         }
     }
