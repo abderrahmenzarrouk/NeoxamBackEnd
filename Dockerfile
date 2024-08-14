@@ -1,7 +1,8 @@
-FROM maven:3.9.0-eclipse-temurin-17 as build
+FROM maven:3.8.6-openjdk-17
 WORKDIR /app
-COPY . .
-RUN mvn clean install
+COPY . /app
+EXPOSE 8083
+CMD ["mvn", "spring-boot:run"]
 
 
 FROM openjdk:17
