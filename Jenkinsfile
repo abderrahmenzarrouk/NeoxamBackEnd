@@ -40,8 +40,9 @@ pipeline {
             steps {
                 // Ensure environment variables are set
                 sh "docker-compose exec backend mvn clean package"
+                echo "Built and started Docker containers."
             }
-            echo "Built and started Docker containers."
+
         }
 
         stage("List MySQL Tables") {
