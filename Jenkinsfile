@@ -33,12 +33,18 @@ pipeline {
         stage("Build and Run Containers") {
             steps {
                 script {
+                    echo "Starting to build and run containers"
                     try {
-                        // Build and start containers
                         sh "docker-compose up --build -d"
+                        echo "Docker Compose command executed"
+
+                        // Check Docker Compose logs
+                        sh "docker-compose logs"
 
                         // Check if MySQL container is running
                         def mysqlStatus = sh(script: "docker ps --filter 'name=mysql' --format '{{.Names}}'", returnStdout: true).trim()
+                        echo "MySQL container status: ${mysqlStatus}"
+
                         if (mysqlStatus == "mysql") {
                             echo "MySQL container is running."
 
@@ -55,6 +61,7 @@ pipeline {
                 }
             }
         }
+
 
         stage("Build application") {
             steps {
