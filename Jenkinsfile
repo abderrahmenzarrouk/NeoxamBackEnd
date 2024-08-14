@@ -86,7 +86,6 @@ pipeline {
             }
         }
 
-
         stage("List MySQL Tables") {
             steps {
                 script {
