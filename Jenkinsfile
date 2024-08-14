@@ -31,7 +31,7 @@ pipeline {
             steps {
                 script {
                     sh "docker-compose up --build -d"
-
+                    echo "Built and started Docker containers.1"
                 }
             }
         }
