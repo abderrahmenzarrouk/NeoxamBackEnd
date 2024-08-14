@@ -54,6 +54,14 @@ pipeline {
             }
         }
 
+        stage("List MySQL Tables") {
+            steps {
+                script {
+                    sh "docker-compose exec mysql mysql -u root -proot -e 'SHOW TABLES FROM neoxame;'"
+                }
+            }
+        }
+
         stage("Test application") {
             when {
                 branch 'main' // Run tests only on the main branch
