@@ -6,11 +6,6 @@ pipeline {
         jdk "Java17"
         maven "Maven3"
     }
-    environment {
-        MYSQL_URL = 'jdbc:mysql://localhost:3306/neoxame' // Corrected URL
-        MYSQL_USER = 'root'
-        MYSQL_PASSWORD = 'root'
-    }
     stages {
         stage("Cleanup Workspace") {
             steps {
@@ -24,17 +19,21 @@ pipeline {
             }
         }
 
-        stage("Setup MySQL") {
+        stage('Setup MySQL') {
             steps {
                 script {
-                    // Start a MySQL container and keep it running in the background
-                    docker.image('mysql:latest').withRun('-e MYSQL_ROOT_PASSWORD=${MYSQL_PASSWORD} -e MYSQL_DATABASE=neoxame -p 3306:3306 --name mysql') { c ->
-                        // Wait for MySQL to be ready
-                        waitUntil {
-                            script {
-                                def ready = sh(script: "docker exec ${c.id} mysqladmin ping -h localhost --silent", returnStatus: true)
-                                return (ready == 0)
-                            }
+                    // Remove existing MySQL container if it exists
+                    sh "docker ps -a --filter name=mysql --format '{{.Names}}' | grep -w mysql && docker stop mysql || true"
+                    sh "docker ps -a --filter name=mysql --format '{{.Names}}' | grep -w mysql && docker rm mysql || true"
+
+                    // Run new MySQL container
+                    sh "docker run -d --name mysql -e MYSQL_ROOT_PASSWORD=rootpassword -e MYSQL_DATABASE=neoxame -p 3306:3306 mysql:latest"
+
+                    // Wait for MySQL to be ready
+                    waitUntil {
+                        script {
+                            def result = sh(script: "docker exec mysql mysqladmin ping -h localhost --silent", returnStatus: true)
+                            return result == 0
                         }
                     }
                 }
