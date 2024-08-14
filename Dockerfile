@@ -18,4 +18,4 @@ COPY src /app/src
 RUN ./mvnw clean package
 
 # Set the entrypoint to run the application
-ENTRYPOINT ["java", "-jar", "target/your-application.jar"]
+ENTRYPOINT ["java", "-jar", "neoxamBack-0.0.1-SNAPSHOT.jar"]
