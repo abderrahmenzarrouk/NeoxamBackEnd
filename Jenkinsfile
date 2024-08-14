@@ -34,8 +34,20 @@ pipeline {
             steps {
                 script {
                     try {
+                        // Build and start containers
                         sh "docker-compose up --build -d"
-                        echo "Built and started Docker containers."
+
+                        // Check if MySQL container is running
+                        def mysqlStatus = sh(script: "docker ps --filter 'name=mysql' --format '{{.Names}}'", returnStdout: true).trim()
+                        if (mysqlStatus == "mysql") {
+                            echo "MySQL container is running."
+
+                            // Get the MySQL container IP address
+                            def mysqlIp = sh(script: "docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' mysql", returnStdout: true).trim()
+                            echo "MySQL container IP address: ${mysqlIp}"
+                        } else {
+                            error "MySQL container is not running."
+                        }
                     } catch (Exception e) {
                         echo "Failed to build and run Docker containers."
                         throw e
