@@ -6,16 +6,11 @@ services:
     environment:
       MYSQL_ROOT_PASSWORD: root
       MYSQL_DATABASE: neoxame
+    networks:
+      mynetwork:
+        ipv4_address: 172.17.0.2
     ports:
       - "3306:3306"
-    networks:
-      - mynetwork
-    healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-proot"]
-      interval: 10s
-      retries: 5
-      start_period: 30s
-      timeout: 10s
 
   backend:
     image: openjdk:17
@@ -24,10 +19,9 @@ services:
       context: .
       dockerfile: Dockerfile
     depends_on:
-      mysql:
-        condition: service_healthy
+      - mysql
     environment:
-      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/neoxame
+      SPRING_DATASOURCE_URL: jdbc:mysql://172.17.0.2:3306/neoxame
       SPRING_DATASOURCE_USERNAME: root
       SPRING_DATASOURCE_PASSWORD: root
     networks:
@@ -36,3 +30,6 @@ services:
 networks:
   mynetwork:
     driver: bridge
+    ipam:
+      config:
+        - subnet: 172.17.0.0/16
