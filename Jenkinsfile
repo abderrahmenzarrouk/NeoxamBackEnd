@@ -1,6 +1,6 @@
 pipeline {
     agent {
-        label "jinkins-agent"
+        label "jinkins-agent" // Adjust this to your Jenkins agent label
     }
     tools {
         jdk "Java17"
@@ -19,20 +19,27 @@ pipeline {
             }
         }
 
-        stage('Setup MySQL') {
+        stage("Clean Up Existing Containers") {
             steps {
                 script {
-                    // Remove existing MySQL container if it exists
-                    sh "docker ps -a --filter name=mysql --format '{{.Names}}' | grep -w mysql && docker stop mysql || true"
-                    sh "docker ps -a --filter name=mysql --format '{{.Names}}' | grep -w mysql && docker rm mysql || true"
+                    sh "docker ps -q --filter 'name=mysql' | xargs -r docker rm -f"
+                }
+            }
+        }
 
-                    // Run new MySQL container
-                    sh "docker run -d --name mysql -e MYSQL_ROOT_PASSWORD=rootpassword -e MYSQL_DATABASE=neoxame -p 3306:3306 mysql:latest"
+        stage("Build and Run Containers") {
+            steps {
+                script {
+                    sh "docker-compose up --build -d"
 
                     // Wait for MySQL to be ready
                     waitUntil {
                         script {
-                            def result = sh(script: "docker exec mysql mysqladmin ping -h localhost --silent", returnStatus: true)
+                            def result = sh(script: "docker-compose exec mysql mysqladmin ping -h localhost --silent", returnStatus: true)
+                            if (result != 0) {
+                                // Print container logs if MySQL is not ready
+                                sh "docker-compose logs mysql"
+                            }
                             return result == 0
                         }
                     }
@@ -42,7 +49,7 @@ pipeline {
 
         stage("Build application") {
             steps {
-                sh "mvn clean package"
+                sh "docker-compose exec app mvn clean package"
             }
         }
 
@@ -51,8 +58,14 @@ pipeline {
                 branch 'main' // Run tests only on the main branch
             }
             steps {
-                sh "mvn test"
+                sh "docker-compose exec app mvn test"
             }
+        }
+    }
+    post {
+        always {
+            // Clean up Docker containers
+            sh "docker-compose down"
         }
     }
 }
