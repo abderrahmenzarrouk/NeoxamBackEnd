@@ -101,18 +101,15 @@ pipeline {
         }
 
         stage("Test application") {
-            when {
-                branch 'main' // Run tests only on the main branch
-            }
             steps {
-                script {
-                    try {
-                        sh "docker exec backend mvn test -Dspring.profiles.active=docker"
-                        echo "Application tests completed."
-                    } catch (Exception e) {
-                        echo "Failed to run application tests."
-                        throw e
-                    }
+               sh "mvn test"
+            }
+        }
+
+        stage("Sonarqube Analysis") {
+            steps {
+                withSonarQubeEnv(credentialsId: 'jenkins-sonarqube-token') {
+                    sh "mvn sonar:sonar"
                 }
             }
         }
