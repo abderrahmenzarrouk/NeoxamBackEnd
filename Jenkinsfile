@@ -75,7 +75,18 @@ pipeline {
                 script {
                     echo "Starting to build and run backend container"
                     try {
+                        // Check if a container named 'backend' exists (running or stopped)
+                        def backendExists = sh(script: "docker ps -a -q -f name=backend", returnStdout: true).trim()
+
+                        if (backendExists) {
+                            echo "Backend container exists. Removing it."
+                            sh "docker rm -f backend" // Force remove any existing 'backend' container
+                        }
+
+                        // Build the backend container
                         sh "docker build -t backend -f Dockerfile ."
+
+                        // Run the backend container
                         sh "docker run -d --name backend --link mysql:mysql -e SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/neoxame -e SPRING_DATASOURCE_USERNAME=root -e SPRING_DATASOURCE_PASSWORD=root backend"
                         echo "Backend container built and started successfully."
 
@@ -87,7 +98,7 @@ pipeline {
                         echo "MySQL container status: ${mysqlStatus}"
 
                         if (mysqlStatus != "mysql") {
-                            error "MySQL container is not running, backend container setup may fail."
+                            error "MySQL container is not running; backend container setup may fail."
                         }
                     } catch (Exception e) {
                         echo "Failed to build and run backend container."
@@ -96,6 +107,7 @@ pipeline {
                 }
             }
         }
+
 
         stage("List MySQL Tables") {
             steps {
