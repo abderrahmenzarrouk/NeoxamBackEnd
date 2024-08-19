@@ -36,11 +36,20 @@ pipeline {
                 script {
                     echo "Starting MySQL container"
                     try {
+                        // Check if a container named 'mysql' is already running
+                        def mysqlExists = sh(script: "docker ps -q -f name=mysql", returnStdout: true).trim()
+
+                        if (mysqlExists) {
+                            echo "MySQL container already exists. Removing it."
+                            sh "docker rm -f mysql"
+                        }
+
+                        // Start a new MySQL container
                         sh "docker run -d --name mysql -e MYSQL_ROOT_PASSWORD=root -e MYSQL_DATABASE=neoxame -p 3306:3306 mysql:latest"
+                        echo "MySQL container started."
 
                         // Check MySQL container status
                         def mysqlStatus = sh(script: "docker ps --filter 'name=mysql' --format '{{.Names}}'", returnStdout: true).trim()
-                        echo "MySQL container status: ${mysqlStatus}"
 
                         if (mysqlStatus == "mysql") {
                             echo "MySQL container is running."
@@ -58,6 +67,7 @@ pipeline {
                 }
             }
         }
+
 
         stage("Build and Run Backend Container") {
             steps {
