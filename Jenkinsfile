@@ -7,7 +7,7 @@ pipeline {
         maven "Maven3"
     }
     environment {
-        APP_NAME = "NeoxamBackEnd"
+        APP_NAME = "neoxambackend"
         RELEASE = "1.0.0"
         DOCKER_USER = "zarroukabderrahmen"
         DOCKER_PASS = 'dockerhub'
