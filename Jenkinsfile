@@ -36,12 +36,12 @@ pipeline {
                 script {
                     echo "Starting MySQL container"
                     try {
-                        // Check if a container named 'mysql' is already running
-                        def mysqlExists = sh(script: "docker ps -q -f name=mysql", returnStdout: true).trim()
+                        // Check if a container named 'mysql' exists (running or stopped)
+                        def mysqlExists = sh(script: "docker ps -a -q -f name=mysql", returnStdout: true).trim()
 
                         if (mysqlExists) {
-                            echo "MySQL container already exists. Removing it."
-                            sh "docker rm -f mysql"
+                            echo "MySQL container exists. Removing it."
+                            sh "docker rm -f mysql" // Force remove any existing 'mysql' container
                         }
 
                         // Start a new MySQL container
@@ -67,6 +67,7 @@ pipeline {
                 }
             }
         }
+
 
 
         stage("Build and Run Backend Container") {
